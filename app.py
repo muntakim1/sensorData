@@ -7,7 +7,7 @@ from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
-
+import plotly.express as px
 #initialize the app
 app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -92,6 +92,22 @@ content=dbc.Container(
             style=CONTENT_STYLE
         )
 
+light= df['light'].value_counts()
+
+trace1 = go.Pie(labels = light.index,
+                   values = light.values,
+                   domain =   {'x': [0.33, 1.0], 'y': [0.33, 1.0]},
+                   hoverinfo = 'label',
+                   )
+layout = go.Layout(
+    width=600,
+    height=600,
+                   autosize = False,
+
+                   title = 'Light(On or OFF) ')
+
+Piefig = go.Figure(data = [trace1], layout = layout)
+
 # Main App layout 
 app.layout = html.Div(
     children=[
@@ -111,7 +127,7 @@ def render_page_content(pathname):
         id='interval-component',
         interval=3*1000,  # in milliseconds
         n_intervals=0
-    )]
+    ),dcc.Graph(id="Pie-Object",figure=Piefig,config={ "displayModeBar":False}),]
     elif pathname == "/predictions":
         return html.P("Content of the page is in Under Development ",className="text-danger")
     elif pathname == "/bigquery":
@@ -130,12 +146,11 @@ def render_page_content(pathname):
               Input('interval-component', 'n_intervals'))
 def UpdataPage(n_intervals):
     get_chunk = flow_from_df(df)
-    data=[]
     for x in range(n_intervals):
         data = next(get_chunk)
 
     data.ts=pd.to_datetime(data['ts'],unit='ms')
-    fig = make_subplots(rows=3, cols=2, vertical_spacing=0.2,subplot_titles=("time vs CO","time vs humidity", "time vs temperature","time vs lpg","","time vs Smoke"))
+    fig = make_subplots(rows=3, cols=2,horizontal_spacing=0.05, vertical_spacing=0.1,subplot_titles=("time vs CO","time vs humidity", "time vs temperature","time vs lpg","time vs Smoke"))
     fig['layout']['margin'] = {
         'l': 30, 'r': 10, 'b': 30, 't': 30
     }
@@ -173,9 +188,6 @@ def UpdataPage(n_intervals):
         'type': 'scatter'
     }, 2, 2)
 
-    light = data['light'].value_counts()
-    motion = data['motion'].value_counts()
-    fig.add_trace(go.Pie(values=light.values,labels=light.index, hoverinfo = 'label',domain={'x': [0.0, 0.33], 'y': [0.0, 0.33]},title="Pie chart Light On/OFF"))
     fig.append_trace({
         'x': data['ts'],
         'y': data['smoke'],
@@ -183,10 +195,13 @@ def UpdataPage(n_intervals):
         'name': 'time vs smoke',
         'mode': 'lines',
         'type': 'scatter'
-    }, 3, 2)
+    }, 3, 1)
     fig.update_layout(height=700, showlegend=False)
     return fig
 
 
 
 server = app.server
+
+# if __name__=="__main__":
+#     app.run_server(debug=True)
