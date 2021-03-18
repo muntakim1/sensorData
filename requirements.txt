@@ -1,0 +1,11 @@
+wheel
+dash
+dash-core-components
+dash-bootstrap-components
+dash-html-components
+dash-daq
+pandas
+scikit-learn
+numpy
+pandas-profiling
+plotly
