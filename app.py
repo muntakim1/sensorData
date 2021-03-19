@@ -230,7 +230,7 @@ def UpdataPage(n_intervals):
     Temp = daq.Thermometer(
         id='my-daq-thermometer',
         min=math.floor(data['temp'].min()),
-        max=data['temp'].max(),
+        max=math.floor(data['temp'].max()),
         value=data['temp'].mean(),
         label="Temperature (F)",
         color="#9B51E0",
@@ -288,5 +288,5 @@ def UpdataPage(n_intervals):
 
 server = app.server
 
-if __name__=="__main__":
-    app.run_server(debug=True)
+# if __name__=="__main__":
+#     app.run_server(debug=True)
